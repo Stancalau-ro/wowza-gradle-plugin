@@ -1,0 +1,8 @@
+/.idea
+/.gradle
+logs/
+build/
+wowzagradle.iml
+wowzagradle.ipr
+wowzagradle.iws
+.idea
