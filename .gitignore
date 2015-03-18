@@ -6,3 +6,4 @@ wowzagradle.iml
 wowzagradle.ipr
 wowzagradle.iws
 .idea
+*.iml

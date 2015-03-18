@@ -7,19 +7,19 @@ version = '0.0.0'
 repositories { mavenCentral() }
 
 dependencies {
-    pack([group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4'],
-            [group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.1.1'],
+    pack([group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.1.1'],
             [group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.3.6'],
             [group: 'org.apache.httpcomponents', name: 'httpclient-cache', version: '4.3.6']
     )
-    lib
+
+    copylib([group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4'])
 
     dependencies {
         // Wowza 4.0 onward packages apache httpClient and there might be dependency issues:
         // http://www.wowza.com/forums/showthread.php?35743-Conflicting-classes-after-upgrade-to-4-0-1
         // Due to this fact, we exclude wms-restlet* from the wowzaLibsPath libraries as gradle tests
         // do not pass with those dependencies included.
-        compile fileTree(dir: "${rootProject.projectDir}/libs/wowza/4.1.3", include: '*.jar', exclude: '*wms-restlet*')
+        compile fileTree(dir: "${rootProject.projectDir}/libs/wowza/4.1.0", include: '*.jar', exclude: '*wms-restlet*')
     }
 
     testCompile([group: 'junit', name: 'junit', version: '4.11'])
@@ -60,7 +60,7 @@ class WowzaServiceTask extends DefaultTask {
             }
         } else {
             project.exec {
-                commandLine = ['-c',  "service $serviceName $command"]
+                commandLine = ['-c', "service $serviceName $command"]
                 ignoreExitValue = true
             }
         }
@@ -89,9 +89,13 @@ class WowzaDeployTask extends DefaultTask {
             }
         }
 
+        project.copy {
+            from project.configurations.copylib
+            into "$localWowzaPath/lib"
+        }
+
         project.wowza.deploys.each { deploy ->
             project.mkdir("$localWowzaPath/applications/${deploy.applicationName}")
-            println("Creating directory: $localWowzaPath/applications/${deploy.applicationName}")
             project.copy {
                 from deploy.configurationFile
                 into "$localWowzaPath/conf/${deploy.applicationName}"
@@ -109,7 +113,9 @@ class WowzaPlugin implements Plugin<Project> {
 
         project.configurations {
             pack
+            copylib
             compile.extendsFrom pack
+            compile.extendsFrom copylib
         }
 
         project.task('packageJars', type: Jar) {
@@ -122,6 +128,7 @@ class WowzaPlugin implements Plugin<Project> {
         }
 
         project.task('printWow', type: DefaultTask) {
+            //TODO delete this task
             group: 'Wowza'
         } << {
             println(project.wowza.localWowzaPath)
