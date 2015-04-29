@@ -1,0 +1,42 @@
+apply from: 'wowza.plugin'
+
+version = '0.0.0'
+
+repositories { mavenCentral() }
+
+dependencies {
+    pack([group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.1.1'],
+        [group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.3.6'],
+        [group: 'org.apache.httpcomponents', name: 'httpclient-cache', version: '4.3.6'],
+        [group: 'com.google.guava', name:'guava', version:'18.0'])
+
+    copylib([group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4'],
+            [group: 'com.google.guava', name:'guava', version:'18.0'])
+
+    // Wowza 4.0 onward packages apache httpClient and there might be dependency issues:
+    // http://www.wowza.com/forums/showthread.php?35743-Conflicting-classes-after-upgrade-to-4-0-1
+    // Due to this fact, we exclude wms-restlet* from the wowzaLibsPath libraries as gradle tests
+    // do not pass with those dependencies included.
+    compile([group: 'com.google.guava', name:'guava', version:'18.0'],
+            fileTree(dir: "${rootProject.projectDir}/libs/wowza/4.1.0", include: '*.jar', exclude: '*wms-restlet*'))
+
+    testCompile([group: 'junit', name: 'junit', version: '4.11'])
+}
+
+wowza {
+    localWowzaPath = "${System.env['ProgramFiles(x86)']}/Wowza Media Systems/Wowza Streaming Engine 4.1.0"
+    serviceName = 'WowzaStreamingEngine410'
+
+    deploys {
+        testGradleApp1 {
+            applicationName = 'testGradleApp1'
+            configurationFile = file('Application.xml')
+        }
+        testGradleApp2 {
+            applicationName = 'testGradleApp2'
+            configurationFile = file('Application.xml')
+        }
+    }
+}
+
+

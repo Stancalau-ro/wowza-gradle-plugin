@@ -1,192 +1,89 @@
-apply plugin: 'eclipse'
+apply plugin: 'groovy'
+apply plugin: 'maven'
 apply plugin: 'idea'
-apply plugin: WowzaPlugin
 
-version = '0.0.0'
 
-repositories { mavenCentral() }
+if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
+    throw new GradleException("Must Build with Java 1.8, but is ${JavaVersion.current()}")
+}
+
+group = 'ro.stancalau'
+version = '1.1'
+def artifact = 'wowza-gradle-plugin'
+
+configurations {
+    deployment
+    published.extendsFrom archives
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
 
 dependencies {
-    pack([group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.1.1'],
-            [group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.3.6'],
-            [group: 'org.apache.httpcomponents', name: 'httpclient-cache', version: '4.3.6']
-    )
-
-    copylib([group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4'])
-
-    dependencies {
-        // Wowza 4.0 onward packages apache httpClient and there might be dependency issues:
-        // http://www.wowza.com/forums/showthread.php?35743-Conflicting-classes-after-upgrade-to-4-0-1
-        // Due to this fact, we exclude wms-restlet* from the wowzaLibsPath libraries as gradle tests
-        // do not pass with those dependencies included.
-        compile fileTree(dir: "${rootProject.projectDir}/libs/wowza/4.1.0", include: '*.jar', exclude: '*wms-restlet*')
-    }
-
-    testCompile([group: 'junit', name: 'junit', version: '4.11'])
+    compile gradleApi()
+    testCompile ([group: 'org.spockframework', name: 'spock-maven', version: '0.7-groovy-2.0'])
 }
 
-wowza {
-    localWowzaPath = "${System.env['ProgramFiles(x86)']}/Wowza Media Systems/Wowza Streaming Engine 4.1.0"
-    serviceName = 'WowzaStreamingEngine410'
-
-    deploys {
-        testGradleApp1 {
-            applicationName = 'testGradleApp1'
-            configurationFile = file('Application.xml')
-        }
-        testGradleApp2 {
-            applicationName = 'testGradleApp2'
-            configurationFile = file('Application.xml')
-        }
-    }
+jar {
+    baseName = artifact
 }
 
-import org.apache.tools.ant.taskdefs.condition.Os
-class WowzaServiceTask extends DefaultTask {
-    String serviceName
-    String command
+task sourceJar(type: Jar) {
+    description = 'An archive of the source code for Maven Central'
+    baseName = artifact
+    classifier = 'sources'
+    from sourceSets.main.groovy
+}
 
-    @TaskAction
-    def runCommand() {
+task groovydocJar(type: Jar, dependsOn: groovydoc) {
+    description = 'An archive of the GroovyDocs for Maven Central'
+    baseName = artifact
+    classifier = 'javadoc'
+    from fileTree(groovydoc.destinationDir)
+}
 
-        if (serviceName == null) {
-            serviceName = project.wowza.serviceName
-        }
+artifacts {
+    archives groovydocJar, sourceJar
+}
 
-        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-            project.exec {
-                commandLine = ['cmd', '/c', 'net', command, serviceName]
-                ignoreExitValue = true
-            }
-        } else {
-            project.exec {
-                commandLine = ['-c', "service $serviceName $command"]
-                ignoreExitValue = true
-            }
-        }
+install {
+    repositories.mavenInstaller {
+        pom.project(pomConfiguration)
     }
 }
 
-class WowzaDeployTask extends DefaultTask {
-    def jarFiles
-    String localWowzaPath
-
-    @TaskAction
-    def deploy() {
-
-        if (jarFiles == null) {
-            jarFiles = [project.jar.archivePath.absolutePath]
+uploadPublished {
+    repositories.mavenDeployer {
+        repository( url: "https://api.bintray.com/content/stancalau/maven") {
+            authentication(userName: 'stancalau', password: '')
         }
-
-        if (localWowzaPath == null) {
-            localWowzaPath = project.wowza.localWowzaPath
-        }
-
-        jarFiles.each { file ->
-            project.copy {
-                from file
-                into "$localWowzaPath/lib"
-            }
-        }
-
-        project.copy {
-            from project.configurations.copylib
-            into "$localWowzaPath/lib"
-        }
-
-        project.wowza.deploys.each { deploy ->
-            project.mkdir("$localWowzaPath/applications/${deploy.applicationName}")
-            project.copy {
-                from deploy.configurationFile
-                into "$localWowzaPath/conf/${deploy.applicationName}"
-            }
-        }
+        pom.project(pomConfiguration)
     }
 }
 
-class WowzaPlugin implements Plugin<Project> {
-    void apply(Project project) {
-        project.apply(plugin: 'java')
-
-        def deploys = project.container(LocalDeploy)
-        project.extensions.create("wowza", WowzaExtension, project.container(LocalDeploy))
-
-        project.configurations {
-            pack
-            copylib
-            compile.extendsFrom pack
-            compile.extendsFrom copylib
-        }
-
-        project.task('packageJars', type: Jar) {
-            group: 'Wowza'
-            manifest {
-                attributes 'Implementation-Version': project.version
-            }
-            from { project.configurations.pack.collect { it.directory ? it : project.zipTree(it) } }
-            with project.tasks.jar
-        }
-
-        project.task('printWow', type: DefaultTask) {
-            //TODO delete this task
-            group: 'Wowza'
-        } << {
-            println(project.wowza.localWowzaPath)
-        }
-
-        project.task('stopWowza', type: WowzaServiceTask) {
-            group = 'Wowza'
-            command = 'stop'
-
-            doFirst {
-                println("Stopping Wowza Service")
+def getPomConfiguration() {
+    return {
+        name('Wowza Gradle Plugin')
+        description('A Gradle plugin for building Wowza modules')
+        url('https://bitbucket.org/stancalau/wowza-gradle-plugin')
+        licenses {
+            license {
+                name 'GPL 3.0'
+                distribution 'repo'
             }
         }
-
-        project.task('startWowza', type: WowzaServiceTask) {
-            group = 'Wowza'
-            command = 'start'
-
-            doFirst {
-                println("Starting Wowza Service")
+        developers {
+            developer {
+                id('stancalau')
+                name('Stancalau Cristian')
             }
         }
-
-        project.task('restartWowza', type: DefaultTask) {
-            group = 'Wowza'
-        } << {
-            project.tasks.stopWowza.execute()
-            project.tasks.startWowza.execute()
+        scm {
+            connection('scm:https://stancalau@bitbucket.org/stancalau/wowza-gradle-plugin')
+            developerConnection('scm:git@bitbucket.org:/stancalau/wowza-gradle-plugin.git')
+            url('https://bitbucket.org/stancalau/wowza-gradle-plugin')
         }
-
-        project.task('deploy', type: WowzaDeployTask, dependsOn: 'build') {
-            group = 'Wowza'
-        }
-
-        project.tasks.build.dependsOn 'packageJars'
-    }
-}
-
-class LocalDeploy {
-    String name
-    String applicationName
-    String configurationFile
-
-    LocalDeploy(String name) {
-        this.name = name
-    }
-}
-
-class WowzaExtension {
-    final NamedDomainObjectContainer<LocalDeploy> deploys
-    String localWowzaPath
-    String serviceName
-
-    WowzaExtension(deploys) {
-        this.deploys = deploys
-    }
-
-    def deploys(Closure closure) {
-        deploys.configure(closure)
     }
 }

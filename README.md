@@ -1,6 +1,6 @@
 # Wowza Gradle Plugin #
 
-Wowza Gradle Plugin for clean Wowza builds
+Wowza Gradle Plugin for building Wowza modules
 
 ### Prerequisites ###
 

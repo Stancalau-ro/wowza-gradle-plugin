@@ -1,0 +1,18 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        maven {
+            name = 'BinTray'
+            url "http://dl.bintray.com/stancalau/maven"
+        }
+        mavenCentral()
+    }
+    dependencies {
+        //classpath 'ro.stancalau:wowza-gradle-plugin:1.0'
+        classpath files('../build/libs/wowza-gradle-plugin-1.1.jar')
+    }
+}
+
+if (!project.plugins.findPlugin(ro.stancalau.wowza.WowzaPlugin)) {
+    project.apply(plugin:ro.stancalau.wowza.WowzaPlugin)
+}

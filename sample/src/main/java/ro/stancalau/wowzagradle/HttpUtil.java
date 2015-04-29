@@ -27,12 +27,17 @@ public class HttpUtil {
         } catch (IOException e) {
             LOGGER.error("Error calling " + url, e);
         } finally {
-            try {
-                httpclient.close();
-            } catch (IOException e) {
-                LOGGER.error("Cannot close http client.", e);
-            }
+            closeHttpClient(httpclient);
         }
+
         return null;
+    }
+
+    private static void closeHttpClient(CloseableHttpClient httpclient) {
+        try {
+            httpclient.close();
+        } catch (IOException e) {
+            LOGGER.error("Cannot close http client.", e);
+        }
     }
 }

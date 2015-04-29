@@ -209,7 +209,7 @@
 			<Module>
 				<Name>stancalau</Name>
 				<Description>Stancalau</Description>
-				<Class>ro.stancalau.wowza.gradle.Module</Class>
+				<Class>ro.stancalau.wowzagradle.Module</Class>
 			</Module>
 		</Modules>
 		<!-- Properties defined here will be added to the IApplication.getProperties() and IApplicationInstance.getProperties() collections -->
