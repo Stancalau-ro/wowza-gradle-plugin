@@ -25,10 +25,10 @@ class WowzaDeployTask extends DefaultTask {
 
     void deployApplications() {
         project.wowza.deploys.each { deploy ->
-            project.mkdir("$localWowzaPath/$APPLICATIONS_FOLDER/${deploy.applicationName}")
+            project.mkdir("$localWowzaPath/$APPLICATIONS_FOLDER/${deploy.name}")
             project.copy {
                 from deploy.configurationFile
-                into "$localWowzaPath/$CONF_FOLDER/${deploy.applicationName}"
+                into "$localWowzaPath/$CONF_FOLDER/${deploy.name}"
             }
         }
     }

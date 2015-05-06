@@ -1,10 +1,9 @@
 package ro.stancalau.wowza
 
-import org.gradle.api.NamedDomainObjectContainer
 import ro.stancalau.wowza.vo.LocalDeploy
 
 class WowzaExtension {
-    final NamedDomainObjectContainer<LocalDeploy> deploys
+    def deploys
 
     String localWowzaPath
     String serviceName
@@ -15,5 +14,9 @@ class WowzaExtension {
 
     def deploys(Closure closure) {
         deploys.configure(closure)
+    }
+
+    def add(LocalDeploy deploy){
+        deploys.add(deploy)
     }
 }

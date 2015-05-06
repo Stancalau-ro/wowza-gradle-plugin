@@ -10,12 +10,15 @@ import ro.stancalau.wowza.vo.LocalDeploy
 
 class WowzaPlugin implements Plugin<Project> {
 
+    public static final String WOWZA_GROUP = 'Wowza'
+    public static final String WOWZA_EXTENSION = "wowza"
+
     void apply(Project project) {
 
         project.apply(plugin: 'java')
 
         def deploys = project.container(LocalDeploy)
-        project.extensions.create("wowza", WowzaExtension, project.container(LocalDeploy))
+        project.extensions.create(WOWZA_EXTENSION, WowzaExtension, project.container(LocalDeploy))
 
         project.configurations {
             pack
@@ -25,7 +28,7 @@ class WowzaPlugin implements Plugin<Project> {
         }
 
         project.task('packageJars', type: Jar) {
-            group = 'Wowza'
+            group = WOWZA_GROUP
             description = 'Package jars from \'pack\' configuration to build jar.'
             manifest {
                 attributes 'Implementation-Version': project.version
@@ -35,7 +38,7 @@ class WowzaPlugin implements Plugin<Project> {
         }
 
         project.task('stopWowza', type: WowzaServiceTask) {
-            group = 'Wowza'
+            group = WOWZA_GROUP
             description = 'Stop the local Wowza service.'
             command = 'stop'
 
@@ -45,7 +48,7 @@ class WowzaPlugin implements Plugin<Project> {
         }
 
         project.task('startWowza', type: WowzaServiceTask) {
-            group = 'Wowza'
+            group = WOWZA_GROUP
             description = 'Start the local Wowza service.'
             command = 'start'
 
@@ -55,7 +58,7 @@ class WowzaPlugin implements Plugin<Project> {
         }
 
         project.task('restartWowza', type: DefaultTask) {
-            group = 'Wowza'
+            group = WOWZA_GROUP
             description = 'Restart the local Wowza service.'
         } << {
             project.tasks.stopWowza.execute()
@@ -63,7 +66,7 @@ class WowzaPlugin implements Plugin<Project> {
         }
 
         project.task('deploy', type: WowzaDeployTask, dependsOn: 'build') {
-            group = 'Wowza'
+            group = WOWZA_GROUP
             description = 'Deploy the build jar to the local Wowza host and setup specified applications. Also copies \'copylib\' configuration jars to <wowzaPath>/lib'
         }
 

@@ -6,9 +6,9 @@ repositories { mavenCentral() }
 
 dependencies {
     pack([group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.1.1'],
-        [group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.3.6'],
-        [group: 'org.apache.httpcomponents', name: 'httpclient-cache', version: '4.3.6'],
-        [group: 'com.google.guava', name:'guava', version:'18.0'])
+         [group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.3.6'],
+         [group: 'org.apache.httpcomponents', name: 'httpclient-cache', version: '4.3.6'],
+         [group: 'com.google.guava', name:'guava', version:'18.0'])
 
     copylib([group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4'],
             [group: 'com.google.guava', name:'guava', version:'18.0'])
@@ -29,11 +29,9 @@ wowza {
 
     deploys {
         testGradleApp1 {
-            applicationName = 'testGradleApp1'
             configurationFile = file('Application.xml')
         }
         testGradleApp2 {
-            applicationName = 'testGradleApp2'
             configurationFile = file('Application.xml')
         }
     }

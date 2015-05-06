@@ -7,3 +7,4 @@ wowzagradle.ipr
 wowzagradle.iws
 .idea
 *.iml
+/sample/.gradle/**
