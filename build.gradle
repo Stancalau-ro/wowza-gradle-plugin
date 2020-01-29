@@ -1,15 +1,13 @@
-apply plugin: 'groovy'
 apply plugin: 'maven'
-apply plugin: 'idea'
-
+apply plugin: 'maven-publish'
+apply plugin: 'groovy'
 
 if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
-    throw new GradleException("Must Build with Java 1.8, but is ${JavaVersion.current()}")
+    throw new Exception("Must Build with Java 1.8, but is ${JavaVersion.current()}")
 }
 
 group = 'ro.stancalau'
-version = '1.0'
-def artifact = 'wowza-gradle-plugin'
+version = '2.0'
 
 configurations {
     deployment
@@ -17,73 +15,49 @@ configurations {
 }
 
 repositories {
-    mavenLocal()
-    mavenCentral()
+    jcenter()
 }
 
 dependencies {
-    compile gradleApi()
-    testCompile ([group: 'org.spockframework', name: 'spock-maven', version: '0.7-groovy-2.0'])
+    implementation gradleApi()
 }
 
-jar {
-    baseName = artifact
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
-task sourceJar(type: Jar) {
-    description = 'An archive of the source code for Maven Central'
-    baseName = artifact
-    classifier = 'sources'
-    from sourceSets.main.groovy
-}
+publishing {
+    publications {
+        wowzaPluginPub(MavenPublication) {
+            from components.java
 
-task groovydocJar(type: Jar, dependsOn: groovydoc) {
-    description = 'An archive of the GroovyDocs for Maven Central'
-    baseName = artifact
-    classifier = 'javadoc'
-    from fileTree(groovydoc.destinationDir)
-}
+            groupId group
+            artifactId 'wowza-gradle-plugin'
+            version version
 
-artifacts {
-    archives groovydocJar, sourceJar
-}
-
-install {
-    repositories.mavenInstaller {
-        pom.project(pomConfiguration)
-    }
-}
-
-uploadPublished {
-    repositories.mavenDeployer {
-        repository( url: "https://api.bintray.com/content/stancalau/maven") {
-            authentication(userName: 'stancalau', password: '')
-        }
-        pom.project(pomConfiguration)
-    }
-}
-
-def getPomConfiguration() {
-    return {
-        name('Wowza Gradle Plugin')
-        description('A Gradle plugin for building Wowza modules')
-        url('https://bitbucket.org/stancalau/wowza-gradle-plugin')
-        licenses {
-            license {
-                name 'GPL 3.0'
-                distribution 'repo'
+            pom {
+                name = 'Wowza Gradle Plugin'
+                description = 'A Gradle plugin for building Wowza modules'
+                url = 'https://github.com/stancalau/wowza-gradle-plugin.git'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'https://github.com/stancalau/wowza-gradle-plugin/blob/master/LICENSE.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'stancalau'
+                        name = 'Stancalau Cristian'
+                        email = 'contact@stancalau.ro'
+                    }
+                }
+                scm {
+                    connection = 'scm:git@github.com:stancalau/wowza-gradle-plugin.git'
+                    url = 'https://github.com/stancalau/wowza-gradle-plugin'
+                }
             }
-        }
-        developers {
-            developer {
-                id('stancalau')
-                name('Stancalau Cristian')
-            }
-        }
-        scm {
-            connection('scm:https://stancalau@bitbucket.org/stancalau/wowza-gradle-plugin')
-            developerConnection('scm:git@bitbucket.org:/stancalau/wowza-gradle-plugin.git')
-            url('https://bitbucket.org/stancalau/wowza-gradle-plugin')
         }
     }
 }

@@ -60,7 +60,7 @@ class WowzaPlugin implements Plugin<Project> {
         project.task('restartWowza', type: DefaultTask) {
             group = WOWZA_GROUP
             description = 'Restart the local Wowza service.'
-        } << {
+        } doLast {
             project.tasks.stopWowza.execute()
             project.tasks.startWowza.execute()
         }

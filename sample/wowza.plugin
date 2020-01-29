@@ -8,8 +8,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'ro.stancalau:wowza-gradle-plugin:1.0'
-        //classpath files('../build/libs/wowza-gradle-plugin-1.0.jar')
+        //classpath 'ro.stancalau:wowza-gradle-plugin:2.0'
+        classpath files('../build/libs/wowza-gradle-plugin-2.0.jar')
     }
 }
 

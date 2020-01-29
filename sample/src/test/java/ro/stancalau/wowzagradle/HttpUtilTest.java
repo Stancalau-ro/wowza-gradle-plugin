@@ -11,9 +11,9 @@ import java.util.List;
 
 public class HttpUtilTest extends TestCase {
 
-    private static final String workingUrl = "http://en.wikipedia.org/wiki/Text_file";
+    private static final String workingUrl = "https://postman-echo.com/post";
     private static final String brokenUrl = "sdfdsgfdgd";
-    private static final String missingUrl = "http://en.wikipedia.org/my_missing_page.txt";
+    private static final String missingUrl = "https://postman-echo.com/somethingThatDoesNotExist";
 
     @Test
     public void testCallServiceHttpWithValidService(){
