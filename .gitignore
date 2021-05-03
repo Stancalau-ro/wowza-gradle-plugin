@@ -1,10 +1,12 @@
 /.idea
 /.gradle
 logs/
+keys/
 build/
 wowzagradle.iml
 wowzagradle.ipr
 wowzagradle.iws
 .idea
 *.iml
+gradle.properties
 /sample/.gradle/**

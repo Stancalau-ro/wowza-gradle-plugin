@@ -1,12 +1,13 @@
 apply plugin: 'maven'
-apply plugin: 'maven-publish'
+apply plugin: 'signing'
 apply plugin: 'groovy'
 
 if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
-    throw new Exception("Must Build with Java 1.8, but is ${JavaVersion.current()}")
+    throw new Exception("Must build with Java 1.8, but is ${JavaVersion.current()}")
 }
 
 group = 'ro.stancalau'
+archivesBaseName = "wowza-gradle-plugin"
 version = '2.0'
 
 configurations {
@@ -22,40 +23,68 @@ dependencies {
     implementation gradleApi()
 }
 
+signing {
+    sign configurations.archives
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
 java {
     withJavadocJar()
     withSourcesJar()
 }
 
-publishing {
-    publications {
-        wowzaPluginPub(MavenPublication) {
-            from components.java
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-            groupId group
-            artifactId 'wowza-gradle-plugin'
-            version version
+            repository(url: "https://s01.oss.sonatype.org/content/repositories/releases/") {
+                authentication(userName: ossrhUsername , password: ossrhPassword)
+            }
 
-            pom {
-                name = 'Wowza Gradle Plugin'
-                description = 'A Gradle plugin for building Wowza modules'
-                url = 'https://github.com/stancalau/wowza-gradle-plugin.git'
+            snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name 'Wowza Gradle Plugin'
+                packaging 'jar'
+                // optionally artifactId can be defined here
+                description 'A Gradle plugin for building Wowza modules.'
+                url 'https://github.com/stancalau/wowza-gradle-plugin.git'
+
+                scm {
+                    connection 'scm:git:git://github.com:stancalau/wowza-gradle-plugin.git'
+                    developerConnection 'scm:git:ssh://github.com:stancalau/wowza-gradle-plugin.git'
+                    url 'https://github.com/stancalau/wowza-gradle-plugin/tree/master'
+                }
+
                 licenses {
                     license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'https://github.com/stancalau/wowza-gradle-plugin/blob/master/LICENSE.txt'
+                        name 'The Apache License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
                     }
                 }
+
                 developers {
                     developer {
-                        id = 'stancalau'
-                        name = 'Stancalau Cristian'
-                        email = 'contact@stancalau.ro'
+                        id 'stancalau'
+                        name 'Stancalau Cristian'
+                        email 'contact@stancalau.ro'
                     }
-                }
-                scm {
-                    connection = 'scm:git@github.com:stancalau/wowza-gradle-plugin.git'
-                    url = 'https://github.com/stancalau/wowza-gradle-plugin'
                 }
             }
         }
