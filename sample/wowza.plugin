@@ -3,7 +3,7 @@ buildscript {
         mavenLocal()
         maven {
             name = 'BinTray'
-            url "http://dl.bintray.com/stancalau/maven"
+            url "https://repo1.maven.org/maven2"
         }
         mavenCentral()
     }
