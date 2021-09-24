@@ -17,10 +17,10 @@ dependencies {
     // http://www.wowza.com/forums/showthread.php?35743-Conflicting-classes-after-upgrade-to-4-0-1
     // Due to this fact, we exclude wms-restlet* from the wowzaLibsPath libraries as gradle tests
     // do not pass with those dependencies included.
-    compile([group: 'com.google.guava', name:'guava', version:'18.0'],
+    implementation([group: 'com.google.guava', name:'guava', version:'18.0'],
             fileTree(dir: "${rootProject.projectDir}/libs/wowza/4.1.0", include: '*.jar', exclude: '*wms-restlet*'))
 
-    testCompile([group: 'junit', name: 'junit', version: '4.11'])
+    testImplementation([group: 'junit', name: 'junit', version: '4.11'])
 }
 
 wowza {

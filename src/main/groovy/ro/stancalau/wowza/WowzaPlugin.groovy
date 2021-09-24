@@ -3,6 +3,7 @@ package ro.stancalau.wowza
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.bundling.Jar
 import ro.stancalau.wowza.tasks.WowzaDeployTask
 import ro.stancalau.wowza.tasks.WowzaServiceTask
@@ -23,13 +24,16 @@ class WowzaPlugin implements Plugin<Project> {
         project.configurations {
             pack
             copylib
-            compile.extendsFrom pack
-            compile.extendsFrom copylib
+            implementation.extendsFrom pack
+            implementation.extendsFrom copylib
         }
+
 
         project.task('packageJars', type: Jar) {
             group = WOWZA_GROUP
             description = 'Package jars from \'pack\' configuration to build jar.'
+            duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
             manifest {
                 attributes 'Implementation-Version': project.version
             }

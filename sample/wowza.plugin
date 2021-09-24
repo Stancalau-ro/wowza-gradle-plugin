@@ -2,10 +2,13 @@ buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
+        maven {
+           url "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+        }
     }
     dependencies {
-        //classpath 'ro.stancalau:wowza-gradle-plugin:2.0'
-        classpath files('../build/libs/wowza-gradle-plugin-2.0.jar')
+        classpath 'ro.stancalau:wowza-gradle-plugin:2.2'
+        //classpath files('../build/libs/wowza-gradle-plugin-2.2.jar')
     }
 }
 
